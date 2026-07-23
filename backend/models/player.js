@@ -13,7 +13,7 @@ const playerSchema = new mongoose.Schema({
         type: String,
         enum: ['batsman', 'bowler', 'all-rounder', 'wicketkeeper']
     },
-    availibiltyStatus: {
+    availabilityStatus: {
         type: Boolean,
         default: true,
     },
