@@ -5,7 +5,7 @@ const getPlayers = async (req, res, next) => {
         const players = await allPlayers.find();
         res.status(200).json(players);
     } catch (error) {
-        next(err);
+        next(error);
     }
 };
 
@@ -25,8 +25,8 @@ const getPlayerbyId = async (req, res, next) => {
 
 const createPlayer = async (req, res, next) => {
     try {
-        const { fullName, contactNumber, role, availabilityStatus, battingStyle, bowlingStyle } = req.body;
-        if (!fullName || !contactNumber || !role || !availabilityStatus || !battingStyle || !bowlingStyle) {
+        const { fullName, contactNumber, role, isAvailable, battingStyle, bowlingStyle } = req.body;
+        if (!fullName || !contactNumber || !role || !isAvailable || !battingStyle || !bowlingStyle) {
             const error = new Error('Every fields are required.')
             error.statusCode = 400;
             return next(error);

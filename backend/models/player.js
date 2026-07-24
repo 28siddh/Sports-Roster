@@ -11,19 +11,23 @@ const playerSchema = new mongoose.Schema({
     },
     role: {
         type: String,
-        enum: ['batsman', 'bowler', 'all-rounder', 'wicketkeeper']
+        enum: ['batsman', 'bowler', 'all-rounder', 'wicketkeeper'],
+        required: true,
     },
-    availabilityStatus: {
+    isAvailable: {
         type: Boolean,
         default: true,
+        required: true,
     },
     battingStyle: {
         type: String,
         enum: ['right-handed', 'left-handed'],
+        required: true,
     },
     bowlingStyle: {
         type: String,
         enum: ['right-handed', 'left-handed', 'pure-batsman'],
+        required: true,
     },
 });
 
