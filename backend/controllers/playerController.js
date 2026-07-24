@@ -27,7 +27,7 @@ const createPlayer = async (req, res, next) => {
     try {
         const { fullName, contactNumber, role, isAvailable, battingStyle, bowlingStyle } = req.body;
         if (!fullName || !contactNumber || !role || !isAvailable || !battingStyle || !bowlingStyle) {
-            const error = new Error('Every fields are required.')
+            const error = new Error('Every field is required.')
             error.statusCode = 400;
             return next(error);
         }
