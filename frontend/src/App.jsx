@@ -1,17 +1,29 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
 import './App.css'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [view, setView] = useState('login')
+  const [sessionToken, setSessionToken] = useState(null)
 
-  return (
-    <>
-      <h1 className="text-3xl font-bold underline">Tailwind works</h1>
-    </>
-  )
+  const handleLoginSuccess = (token) => {
+    setSessionToken(token);
+    setView('dashboard');
+  }
+
+  const handleLogout = () => {
+    setSessionToken(null);
+    setView('login');
+  }
+
+  if (view == 'dashboard' && sessionToken) {
+    return <div>Placeholder for the dashboard - onLogout: {handleLogout}</div>;
+  }
+
+  if (view == 'signup') {
+    return <div>Placeholder for the signup - onSignup: {handleLogout}</div>
+  }
+
+  return <div>Placeholder for the login view</div>
 }
 
-export default App
+export default App;
