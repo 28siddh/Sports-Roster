@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import './App.css'
+import UserLogin from './components/login.jsx'
 
 function App() {
   const [view, setView] = useState('login')
@@ -16,14 +17,23 @@ function App() {
   }
 
   if (view == 'dashboard' && sessionToken) {
-    return <div>Placeholder for the dashboard - onLogout: {handleLogout}</div>;
+    return <div>Placeholder for the dashboard - .onLogout: {handleLogout.name}</div>;
   }
 
   if (view == 'signup') {
-    return <div>Placeholder for the signup - onSignup: {handleLogout}</div>
+    return <div>Placeholder for the signup - onSignup: {handleLogout.name}</div>
   }
 
-  return <div>Placeholder for the login view</div>
+  return (
+    <UserLogin
+      onSubmitLogin={(user, pass) => {
+        console.log("Form Submitted! Username:", user, "Password:", pass);
+        handleLoginSuccess('test-token-123');
+      }}
+      onSwitchToRegister={() => setView('signup')}
+      errorMessage={null}
+    />
+  )
 }
 
 export default App;
