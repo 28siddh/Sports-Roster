@@ -6,7 +6,7 @@ function UserLogin({ onSubmitLogin, onSwitchToRegister, errorMessage }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        onLogin(username, password)
+        onSubmitLogin(username, password)
     };
 
     return (
