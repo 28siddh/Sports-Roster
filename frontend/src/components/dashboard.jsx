@@ -4,9 +4,9 @@ import { API_BASE } from "../apiConfig";
 function Dashboard({ token, onLogout }) {
     const [players, setPlayers] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState(null);
 
-    // Form States
     const [editingId, setEditingId] = useState(null);
     const [fullName, setFullName] = useState('');
     const [contactNumber, setContactNumber] = useState('');
@@ -52,7 +52,9 @@ function Dashboard({ token, onLogout }) {
 
     const handleFormSubmit = async (e) => {
         e.preventDefault();
+        if (submitting) return;
         setError(null);
+        setSubmitting(true);
 
         const isEditing = editingId !== null;
         const url = isEditing ? `${API_BASE}/players/${editingId}` : `${API_BASE}/players`;
@@ -83,16 +85,16 @@ function Dashboard({ token, onLogout }) {
             }
 
             if (isEditing) {
-                // Update the specific player in the array
                 setPlayers(players.map((p) => p._id === editingId ? data : p));
             } else {
-                // Add the new player to the array
                 setPlayers([...players, data]);
             }
 
             resetForm();
         } catch (err) {
             setError(`Could not reach server to ${isEditing ? 'update' : 'add'} player.`);
+        } finally {
+            setSubmitting(false);
         }
     };
 
@@ -100,14 +102,10 @@ function Dashboard({ token, onLogout }) {
         setEditingId(player._id);
         setFullName(player.fullName);
         setContactNumber(player.contactNumber);
-
-        // Capitalizing the first letter to visually match the dropdown options
         setRole(player.role.charAt(0).toUpperCase() + player.role.slice(1));
         setIsAvailable(player.isAvailable ? 'Available' : 'Unavailable');
         setBattingStyle(player.battingStyle.charAt(0).toUpperCase() + player.battingStyle.slice(1));
         setBowlingStyle(player.bowlingStyle.charAt(0).toUpperCase() + player.bowlingStyle.slice(1));
-
-        // Smooth scroll to top of page so user sees the form
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
@@ -126,10 +124,7 @@ function Dashboard({ token, onLogout }) {
                 return;
             }
 
-            // Instantly remove from UI
             setPlayers(players.filter((p) => p._id !== playerId));
-
-            // If they deleted the player they were currently editing, reset the form
             if (editingId === playerId) resetForm();
 
         } catch (err) {
@@ -246,15 +241,18 @@ function Dashboard({ token, onLogout }) {
                         <div className="flex space-x-3 pt-2">
                             <button
                                 type="submit"
-                                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg shadow transition"
+                                disabled={submitting}
+                                className={`flex-1 font-bold py-3 rounded-lg shadow transition text-white ${submitting ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
+                                    }`}
                             >
-                                {editingId ? '✓ Update Player' : '+ Add Player to Squad'}
+                                {submitting ? 'Saving...' : editingId ? '✓ Update Player' : '+ Add Player to Squad'}
                             </button>
 
                             {editingId && (
                                 <button
                                     type="button"
                                     onClick={resetForm}
+                                    disabled={submitting}
                                     className="px-6 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 rounded-lg shadow transition"
                                 >
                                     Cancel
