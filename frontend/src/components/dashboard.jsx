@@ -22,6 +22,12 @@ function Dashboard({ token, onLogout }) {
                     method: 'GET',
                     headers: { authorization: `Bearer ${token}` },
                 });
+
+                if (response.status === 401) {
+                    onLogout();
+                    return;
+                }
+
                 const data = await response.json();
                 if (!response.ok) {
                     setError(data.message || 'Could not load players');
@@ -77,6 +83,11 @@ function Dashboard({ token, onLogout }) {
                 }),
             });
 
+            if (response.status === 401) {
+                onLogout();
+                return;
+            }
+
             const data = await response.json();
 
             if (!response.ok) {
@@ -117,6 +128,11 @@ function Dashboard({ token, onLogout }) {
                 method: 'DELETE',
                 headers: { authorization: `Bearer ${token}` }
             });
+
+            if (response.status === 401) {
+                onLogout();
+                return;
+            }
 
             if (!response.ok) {
                 const data = await response.json();
