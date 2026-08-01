@@ -3,7 +3,7 @@ import './App.css'
 import { API_BASE } from './apiConfig.js'
 import UserLogin from './components/login.jsx'
 import UserRegister from './components/register.jsx'
-import Dashboard from './components/Dashboard.jsx';
+import Dashboard from './components/dashboard.jsx';
 
 function App() {
   const [view, setView] = useState('login')
