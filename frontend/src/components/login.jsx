@@ -58,6 +58,14 @@ function Login({ onSubmitLogin, errorMessage, submitting }) {
                         {submitting ? 'Logging in...' : 'Sign In'}
                     </button>
                 </form>
+
+                {/* New Create Account Link */}
+                <p className="text-center text-sm text-gray-600 mt-4">
+                    Don't have an account?{" "}
+                    <a href="/register" className="text-blue-600 hover:underline font-medium">
+                        Create one here
+                    </a>
+                </p>
             </div>
         </div>
     );
