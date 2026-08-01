@@ -29,6 +29,12 @@ const playerSchema = new mongoose.Schema({
         enum: ['right-handed', 'left-handed', 'pure-batsman'],
         required: true,
     },
+
+    userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+    }
 });
 
 module.exports = mongoose.model('Player', playerSchema);
