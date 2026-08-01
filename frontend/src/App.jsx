@@ -28,7 +28,6 @@ function App() {
         return;
       }
 
-      console.log("Login successful", data.token);
       setSessionToken(data.token);
       setView('dashboard');
     } catch (error) {
@@ -54,15 +53,15 @@ function App() {
       const data = await response.json();
 
       if (!response.ok) {
-        setRegisterError(data.message || 'Resgistration Failed.')
+        setRegisterError(data.message || 'Registration Failed.')
         return;
       }
-      console.log("Registration successful");
       setView('login');
     } catch (error) {
       setRegisterError('Could not reach the server')
     }
   }
+
   if (view === 'signup') {
     return (
       <UserRegister
@@ -76,22 +75,20 @@ function App() {
     )
   }
 
-  if (view === 'login') {
-    return (
-      <UserLogin
-        onSubmitLogin={handleLogin}
-        onSwitchToRegister={() => {
-          setRegisterError(null);
-          setView('signup');
-        }}
-        errorMessage={loginError}
-      />
-    );
-  }
-
   if (view === 'dashboard' && sessionToken) {
     return <Dashboard onLogout={handleLogout} token={sessionToken} />;
   }
-};
+
+  return (
+    <UserLogin
+      onSubmitLogin={handleLogin}
+      onSwitchToRegister={() => {
+        setRegisterError(null);
+        setView('signup');
+      }}
+      errorMessage={loginError}
+    />
+  );
+}
 
 export default App;
