@@ -90,7 +90,7 @@ function App() {
   }
 
   if (view === 'dashboard' && sessionToken) {
-    return <Dashboard onLogout={handleLogout} />;
+    return <Dashboard onLogout={handleLogout} token={sessionToken} />;
   }
 };
 
