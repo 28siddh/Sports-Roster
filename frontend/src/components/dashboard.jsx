@@ -6,12 +6,14 @@ function Dashboard({ token, onLogout }) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    // Form States
+    const [editingId, setEditingId] = useState(null);
     const [fullName, setFullName] = useState('');
     const [contactNumber, setContactNumber] = useState('');
     const [role, setRole] = useState('Batsman');
     const [isAvailable, setIsAvailable] = useState('Available');
-    const [battingStyle, setBattingStyle] = useState('right-handed');
-    const [bowlingStyle, setBowlingStyle] = useState('right-handed');
+    const [battingStyle, setBattingStyle] = useState('Right-handed');
+    const [bowlingStyle, setBowlingStyle] = useState('Right-handed');
 
     useEffect(() => {
         const fetchPlayers = async () => {
@@ -37,12 +39,28 @@ function Dashboard({ token, onLogout }) {
         }
     }, [token]);
 
-    const handleAddPlayer = async (e) => {
+    const resetForm = () => {
+        setEditingId(null);
+        setFullName('');
+        setContactNumber('');
+        setRole('Batsman');
+        setIsAvailable('Available');
+        setBattingStyle('Right-handed');
+        setBowlingStyle('Right-handed');
+        setError(null);
+    };
+
+    const handleFormSubmit = async (e) => {
         e.preventDefault();
         setError(null);
+
+        const isEditing = editingId !== null;
+        const url = isEditing ? `${API_BASE}/players/${editingId}` : `${API_BASE}/players`;
+        const method = isEditing ? 'PUT' : 'POST';
+
         try {
-            const response = await fetch(`${API_BASE}/players`, {
-                method: 'POST',
+            const response = await fetch(url, {
+                method,
                 headers: {
                     'Content-Type': 'application/json',
                     authorization: `Bearer ${token}`
@@ -57,22 +75,65 @@ function Dashboard({ token, onLogout }) {
                 }),
             });
 
-            const newPlayer = await response.json();
+            const data = await response.json();
 
             if (!response.ok) {
-                setError(newPlayer.message || 'Failed to add player');
+                setError(data.message || `Failed to ${isEditing ? 'update' : 'add'} player`);
                 return;
             }
 
-            setPlayers([...players, newPlayer]);
-            setFullName('');
-            setContactNumber('');
-            setRole('Batsman');
-            setIsAvailable('Available');
-            setBowlingStyle('right-handed');
-            setBattingStyle('right-handed');
+            if (isEditing) {
+                // Update the specific player in the array
+                setPlayers(players.map((p) => p._id === editingId ? data : p));
+            } else {
+                // Add the new player to the array
+                setPlayers([...players, data]);
+            }
+
+            resetForm();
         } catch (err) {
-            setError('Could not reach server to add player.');
+            setError(`Could not reach server to ${isEditing ? 'update' : 'add'} player.`);
+        }
+    };
+
+    const handleEditClick = (player) => {
+        setEditingId(player._id);
+        setFullName(player.fullName);
+        setContactNumber(player.contactNumber);
+
+        // Capitalizing the first letter to visually match the dropdown options
+        setRole(player.role.charAt(0).toUpperCase() + player.role.slice(1));
+        setIsAvailable(player.isAvailable ? 'Available' : 'Unavailable');
+        setBattingStyle(player.battingStyle.charAt(0).toUpperCase() + player.battingStyle.slice(1));
+        setBowlingStyle(player.bowlingStyle.charAt(0).toUpperCase() + player.bowlingStyle.slice(1));
+
+        // Smooth scroll to top of page so user sees the form
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    const handleDeleteClick = async (playerId) => {
+        if (!window.confirm("Are you sure you want to remove this player from the squad?")) return;
+
+        try {
+            const response = await fetch(`${API_BASE}/players/${playerId}`, {
+                method: 'DELETE',
+                headers: { authorization: `Bearer ${token}` }
+            });
+
+            if (!response.ok) {
+                const data = await response.json();
+                setError(data.message || 'Failed to delete player');
+                return;
+            }
+
+            // Instantly remove from UI
+            setPlayers(players.filter((p) => p._id !== playerId));
+
+            // If they deleted the player they were currently editing, reset the form
+            if (editingId === playerId) resetForm();
+
+        } catch (err) {
+            setError('Could not reach server to delete player.');
         }
     };
 
@@ -100,9 +161,11 @@ function Dashboard({ token, onLogout }) {
                 )}
 
                 <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
-                    <h2 className="text-lg font-bold text-gray-800 mb-4">Add New Player</h2>
+                    <h2 className="text-lg font-bold text-gray-800 mb-4">
+                        {editingId ? 'Edit Player' : 'Add New Player'}
+                    </h2>
 
-                    <form onSubmit={handleAddPlayer} className="space-y-4">
+                    <form onSubmit={handleFormSubmit} className="space-y-4">
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
                             <input
@@ -137,8 +200,8 @@ function Dashboard({ token, onLogout }) {
                                 >
                                     <option value="Batsman">Batsman</option>
                                     <option value="Bowler">Bowler</option>
-                                    <option value="All-Rounder">All-Rounder</option>
-                                    <option value="Wicket-Keeper">Wicket-Keeper</option>
+                                    <option value="All-rounder">All-rounder</option>
+                                    <option value="Wicket-keeper">Wicket-keeper</option>
                                 </select>
                             </div>
 
@@ -180,12 +243,24 @@ function Dashboard({ token, onLogout }) {
                             </div>
                         </div>
 
-                        <button
-                            type="submit"
-                            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg shadow transition"
-                        >
-                            + Add Player to Squad
-                        </button>
+                        <div className="flex space-x-3 pt-2">
+                            <button
+                                type="submit"
+                                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg shadow transition"
+                            >
+                                {editingId ? '✓ Update Player' : '+ Add Player to Squad'}
+                            </button>
+
+                            {editingId && (
+                                <button
+                                    type="button"
+                                    onClick={resetForm}
+                                    className="px-6 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 rounded-lg shadow transition"
+                                >
+                                    Cancel
+                                </button>
+                            )}
+                        </div>
                     </form>
                 </div>
 
@@ -212,23 +287,24 @@ function Dashboard({ token, onLogout }) {
                                         </span>
                                     </div>
                                     <p className="text-sm text-gray-500 mt-1">
-                                        Role: <span className="font-medium text-gray-700">{player.role}</span> |
-                                        Contact: {player.contactNumber || player.contact}
+                                        Role: <span className="font-medium text-gray-700">{player.role.charAt(0).toUpperCase() + player.role.slice(1)}</span> |
+                                        Contact: {player.contactNumber}
                                     </p>
                                     <p className="text-xs text-gray-400 mt-1">
-                                        Batting: {player.battingStyle} | Bowling: {player.bowlingStyle}
+                                        Batting: {player.battingStyle.charAt(0).toUpperCase() + player.battingStyle.slice(1)} |
+                                        Bowling: {player.bowlingStyle.charAt(0).toUpperCase() + player.bowlingStyle.slice(1)}
                                     </p>
                                 </div>
 
                                 <div className="flex space-x-2">
                                     <button
-                                        onClick={() => console.log("Edit clicked for ID:", player._id)}
+                                        onClick={() => handleEditClick(player)}
                                         className="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition"
                                     >
                                         Edit
                                     </button>
                                     <button
-                                        onClick={() => console.log("Delete clicked for ID:", player._id)}
+                                        onClick={() => handleDeleteClick(player._id)}
                                         className="px-3 py-1.5 text-sm bg-red-50 hover:bg-red-100 text-red-600 font-medium rounded-lg transition"
                                     >
                                         Delete
