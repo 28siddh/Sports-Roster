@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-function Login({ onSubmitLogin, errorMessage, submitting }) {
+function Login({ onSubmitLogin, errorMessage, submitting, onSwitchToRegister }) {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
 
@@ -59,12 +59,16 @@ function Login({ onSubmitLogin, errorMessage, submitting }) {
                     </button>
                 </form>
 
-                {/* New Create Account Link */}
+                {/* State-based Toggle Button */}
                 <p className="text-center text-sm text-gray-600 mt-4">
                     Don't have an account?{" "}
-                    <a href="/register" className="text-blue-600 hover:underline font-medium">
+                    <button
+                        type="button"
+                        onClick={onSwitchToRegister}
+                        className="text-blue-600 hover:underline font-medium bg-transparent border-none p-0 cursor-pointer"
+                    >
                         Create one here
-                    </a>
+                    </button>
                 </p>
             </div>
         </div>
