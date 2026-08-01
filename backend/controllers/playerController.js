@@ -2,7 +2,7 @@ const allPlayers = require('../models/player.js');
 
 const getPlayers = async (req, res, next) => {
     try {
-        const players = await allPlayers.find({ user: req.user.id });
+        const players = await allPlayers.find({ userId: req.user.userId });
         res.status(200).json(players);
     } catch (error) {
         next(error);
@@ -11,7 +11,7 @@ const getPlayers = async (req, res, next) => {
 
 const getPlayerbyId = async (req, res, next) => {
     try {
-        const player = await allPlayers.findOne({ _id: req.params.id, user: req.user.id });
+        const player = await allPlayers.findOne({ _id: req.params.id, userId: req.user.userId });
         if (!player) {
             const error = new Error('Item not found or unauthorized.');
             error.statusCode = 404;
@@ -33,8 +33,7 @@ const createPlayer = async (req, res, next) => {
             return next(error);
         }
 
-        const userId = req.user.id;
-        const playerData = { ...req.body, user: userId };
+        const playerData = { ...req.body, userId: req.user.userId };
 
         const newPlayer = await allPlayers.create(playerData);
         res.status(201).json(newPlayer);
@@ -46,7 +45,7 @@ const createPlayer = async (req, res, next) => {
 const updatePlayer = async (req, res, next) => {
     try {
         const updated = await allPlayers.findOneAndUpdate(
-            { _id: req.params.id, user: req.user.id },
+            { _id: req.params.id, userId: req.user.userId },
             req.body,
             {
                 new: true,
@@ -67,7 +66,7 @@ const updatePlayer = async (req, res, next) => {
 
 const deletePlayer = async (req, res, next) => {
     try {
-        const deleted = await allPlayers.findOneAndDelete({ _id: req.params.id, user: req.user.id });
+        const deleted = await allPlayers.findOneAndDelete({ _id: req.params.id, userId: req.user.userId });
 
         if (!deleted) {
             const error = new Error('Player not found or unauthorized.')
