@@ -44,9 +44,11 @@ const createPlayer = async (req, res, next) => {
 
 const updatePlayer = async (req, res, next) => {
     try {
+        const { userId, ...updateData } = req.body;
+
         const updated = await allPlayers.findOneAndUpdate(
             { _id: req.params.id, userId: req.user.userId },
-            req.body,
+            updateData,
             {
                 new: true,
                 runValidators: true
